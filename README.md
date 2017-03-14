@@ -31,9 +31,10 @@ use Overtrue\Flysystem\Qiniu\QiniuAdapter;
 
 $accessKey = 'xxxxxx';
 $secretKey = 'xxxxxx';
-$domain = 'xxxx.bkt.clouddn.com';
 $bucket = 'test-bucket-name';
-$adapter = new QiniuAdapter($ak, $sk, $bucket, $domain);
+$domain = 'xxxx.bkt.clouddn.com';
+
+$adapter = new QiniuAdapter($accessKey, $secretKey, $bucket, $domain);
 
 $flysystem = new League\Flysystem\Filesystem($adapter);
 
