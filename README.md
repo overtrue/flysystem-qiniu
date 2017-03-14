@@ -65,7 +65,7 @@ int $flysystem->getSize('file.md'));
 
 string $flysystem->getMimetype('file.md'));
 
-$flysystem->getTimestamp('file.md'));
+int $flysystem->getTimestamp('file.md'));
 
 ```
 
