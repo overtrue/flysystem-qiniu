@@ -71,7 +71,7 @@ int $flysystem->getTimestamp('file.md'));
 
 # For Laravel
 
-[overtrue/laravel-qiniu](https://github.com/overtrue/laravel-qiniu)
+[overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
 
 # License
 
