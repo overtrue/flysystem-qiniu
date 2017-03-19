@@ -43,29 +43,33 @@ $flysystem = new League\Flysystem\Filesystem($adapter);
 ## API
 
 ```php
-bool $flysystem->write('file.md', 'contents'));
+bool $flysystem->write('file.md', 'contents');
 
-bool $flysystem->update('file.md', 'new contents'));
+bool $flysystem->writeStream('file.md', fopen('path/to/your/local/file.jpg', 'r'));
 
-bool $flysystem->rename('foo.md', 'bar.md'));
+bool $flysystem->update('file.md', 'new contents');
 
-bool $flysystem->copy('foo.md', 'foo2.md'));
+bool $flysystem->updateStram('file.md', fopen('path/to/your/local/file.jpg', 'r'));
 
-bool $flysystem->delete('file.md'));
+bool $flysystem->rename('foo.md', 'bar.md');
 
-bool $flysystem->has('file.md'));
+bool $flysystem->copy('foo.md', 'foo2.md');
 
-string|false $flysystem->read('file.md'));
+bool $flysystem->delete('file.md');
 
-array $flysystem->listContents());
+bool $flysystem->has('file.md');
 
-array $flysystem->getMetadata('file.md'));
+string|false $flysystem->read('file.md');
 
-int $flysystem->getSize('file.md'));
+array $flysystem->listContents();
 
-string $flysystem->getMimetype('file.md'));
+array $flysystem->getMetadata('file.md');
 
-int $flysystem->getTimestamp('file.md'));
+int $flysystem->getSize('file.md');
+
+string $flysystem->getMimetype('file.md');
+
+int $flysystem->getTimestamp('file.md');
 
 ```
 
