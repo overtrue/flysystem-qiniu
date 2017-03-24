@@ -219,7 +219,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function read($path)
     {
-        $contents = file_get_contents('http://'.$this->domain.'/'.$path);
+        $contents = file_get_contents($this->normalizeHost($this->domain).$path);
 
         return compact('contents', 'path');
     }
@@ -234,7 +234,7 @@ class QiniuAdapter extends AbstractAdapter
     public function readStream($path)
     {
         if (ini_get('allow_url_fopen')) {
-            $stream = fopen('http://'.$this->domain.'/'.$path, 'r');
+            $stream = fopen($this->normalizeHost($this->domain).$path, 'r');
 
             return compact('stream', 'path');
         }
@@ -393,5 +393,19 @@ class QiniuAdapter extends AbstractAdapter
             'timestamp' => floor($stats['putTime'] / 10000000),
             'size' => $stats['fsize'],
         ];
+    }
+
+    /**
+     * @param  string $domain
+     *
+     * @return string
+     */
+    protected function normalizeHost($domain)
+    {
+        if (0 !== stripos($domain, 'https://') && 0 !== stripos($domain, 'http://')) {
+            $domain = "http://{$domain}";
+        }
+
+        return rtrim($domain, '/').'/';
     }
 }

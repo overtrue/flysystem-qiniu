@@ -32,7 +32,7 @@ use Overtrue\Flysystem\Qiniu\QiniuAdapter;
 $accessKey = 'xxxxxx';
 $secretKey = 'xxxxxx';
 $bucket = 'test-bucket-name';
-$domain = 'xxxx.bkt.clouddn.com';
+$domain = 'xxxx.bkt.clouddn.com'; // or with protocol: https://xxxx.bkt.clouddn.com
 
 $adapter = new QiniuAdapter($accessKey, $secretKey, $bucket, $domain);
 
