@@ -211,6 +211,18 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
+     * Get resource url.
+     *
+     * @param  string $path
+     *
+     * @return string
+     */
+    public function getUrl($path)
+    {
+        return $this->normalizeHost($this->domain).$path;
+    }
+
+    /**
      * Read a file.
      *
      * @param string $path
@@ -219,7 +231,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function read($path)
     {
-        $contents = file_get_contents($this->normalizeHost($this->domain).$path);
+        $contents = file_get_contents($this->getUrl($path));
 
         return compact('contents', 'path');
     }
