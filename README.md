@@ -49,7 +49,7 @@ bool $flysystem->writeStream('file.md', fopen('path/to/your/local/file.jpg', 'r'
 
 bool $flysystem->update('file.md', 'new contents');
 
-bool $flysystem->updateStram('file.md', fopen('path/to/your/local/file.jpg', 'r'));
+bool $flysystem->updateStream('file.md', fopen('path/to/your/local/file.jpg', 'r'));
 
 bool $flysystem->rename('foo.md', 'bar.md');
 
