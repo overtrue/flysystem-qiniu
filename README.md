@@ -75,9 +75,10 @@ int $flysystem->getTimestamp('file.md');
 
 ```
 
-# For Laravel
+# Integration
 
-[overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
+- Laravel 5: [overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
+- Yii2: [krissss/yii2-filesystem-qiniu](https://github.com/krissss/yii2-filesystem-qiniu)
 
 # License
 
