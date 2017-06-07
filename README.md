@@ -67,7 +67,7 @@ array $flysystem->getMetadata('file.md');
 
 int $flysystem->getSize('file.md');
 
-string $flysystem->getUrl('file.md'); 
+string $flysystem->getAdapter()->getUrl('file.md'); 
 
 string $flysystem->getMimetype('file.md');
 
