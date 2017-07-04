@@ -213,7 +213,7 @@ class QiniuAdapter extends AbstractAdapter
     /**
      * Get resource url.
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return string
      */
@@ -408,7 +408,7 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
-     * @param  string $domain
+     * @param string $domain
      *
      * @return string
      */
