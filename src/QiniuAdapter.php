@@ -319,7 +319,12 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function fetch($path, $url)
     {
-        return $this->getBucketManager()->fetch($url, $this->bucket, $path);
+        list($response, $error) = $this->getBucketManager()->fetch($url, $this->bucket, $path);
+        if ($error) {
+            return false;
+        }
+
+        return $response;
     }
 
     /**
