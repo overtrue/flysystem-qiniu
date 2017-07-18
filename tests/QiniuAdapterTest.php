@@ -30,8 +30,8 @@ class QiniuAdapterTest extends TestCase
     public function qiniuProvider()
     {
         $adapter = Mockery::mock(QiniuAdapter::class, ['accessKey', 'secretKey', 'bucket', 'domain.com'])
-                            ->makePartial()
-                            ->shouldAllowMockingProtectedMethods();
+            ->makePartial()
+            ->shouldAllowMockingProtectedMethods();
         $authManager = \Mockery::mock('stdClass');
         $bucketManager = \Mockery::mock('stdClass');
         $uploadManager = \Mockery::mock('stdClass');
@@ -54,9 +54,9 @@ class QiniuAdapterTest extends TestCase
      */
     public function testWrite($adapter, $managers)
     {
-        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'content')
-                                    ->andReturns(['response', false], ['response', true])
-                                    ->twice();
+        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'content', null, 'application/octet-stream')
+            ->andReturns(['response', false], ['response', true])
+            ->twice();
 
         $this->assertSame('response', $adapter->write('foo/bar.md', 'content', new Config()));
         $this->assertFalse($adapter->write('foo/bar.md', 'content', new Config()));
@@ -65,11 +65,31 @@ class QiniuAdapterTest extends TestCase
     /**
      * @dataProvider qiniuProvider
      */
+    public function testWriteWithMime($adapter, $managers)
+    {
+        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'http://httpbin/org', null, 'application/redirect302')
+            ->andReturns(['response', false], ['response', true])
+            ->twice();
+
+        $this->assertSame(
+            'response',
+            $adapter->write(
+                'foo/bar.md',
+                'http://httpbin/org',
+                new Config(['mime' => 'application/redirect302'])
+            )
+        );
+        $this->assertFalse($adapter->write('foo/bar.md', 'http://httpbin/org', new Config(['mime' => 'application/redirect302'])));
+    }
+
+    /**
+     * @dataProvider qiniuProvider
+     */
     public function testWriteStream($adapter)
     {
         $adapter->expects()->write('foo.md', '', Mockery::type(Config::class))
-                            ->andReturns(true, false)
-                            ->twice();
+            ->andReturns(true, false)
+            ->twice();
 
         $result = $adapter->writeStream('foo.md', tmpfile(), new Config());
         $this->assertSame('foo.md', $result['path']);
@@ -106,9 +126,9 @@ class QiniuAdapterTest extends TestCase
     public function testRename($adapter, $managers)
     {
         $managers['bucketManager']->expects()
-                                    ->rename('bucket', 'old.md', 'new.md')
-                                    ->andReturn(false, null)
-                                    ->twice();
+            ->rename('bucket', 'old.md', 'new.md')
+            ->andReturn(false, null)
+            ->twice();
 
         $this->assertFalse($adapter->rename('old.md', 'new.md'));
         $this->assertTrue($adapter->rename('old.md', 'new.md'));

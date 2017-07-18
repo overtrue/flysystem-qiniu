@@ -58,7 +58,7 @@ class QiniuAdapter extends AbstractAdapter
     {
         $mime = 'application/octet-stream';
 
-        if($config->has('mime')) {
+        if ($config->has('mime')) {
             $mime = $config->get('mime');
         }
 
@@ -66,7 +66,7 @@ class QiniuAdapter extends AbstractAdapter
             $this->getAuthManager()->uploadToken($this->bucket),
             $path,
             $contents,
-            NULL,
+            null,
             $mime
         );
 
@@ -311,7 +311,7 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
-     * Fetch url to bucket
+     * Fetch url to bucket.
      *
      * @param string $path
      * @param string $url
