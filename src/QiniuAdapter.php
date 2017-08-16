@@ -17,7 +17,7 @@ use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 
 /**
- * Class QiniuAdapter
+ * Class QiniuAdapter.
  *
  * @author overtrue <i@overtrue.me>
  */
@@ -427,8 +427,8 @@ class QiniuAdapter extends AbstractAdapter
      * Get the upload token.
      *
      * @param string|null $key
-     * @param int  $expires
-     * @param bool $policy
+     * @param int         $expires
+     * @param bool        $policy
      *
      * @return string
      */
