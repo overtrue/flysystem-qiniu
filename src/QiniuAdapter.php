@@ -397,7 +397,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param null $key
      *
-     * @param int $expires
+     * @param int  $expires
      *
      * @param null $policy
      *
@@ -405,7 +405,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function getUploadToken($key = null, $expires = 3600, $policy = null)
     {
-        return $this->getAuthManager()->uploadToken($this->bucket , $key , $expires , $policy);
+        return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy);
     }
 
     /**
