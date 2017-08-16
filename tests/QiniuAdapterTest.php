@@ -262,11 +262,29 @@ class QiniuAdapterTest extends TestCase
     /**
      * @dataProvider qiniuProvider
      */
-    public function testGetsize($adapter)
+    public function testGetSize($adapter)
     {
         $adapter->expects()->getMetadata('foo.md')->andReturns('meta-data')->once();
 
         $this->assertSame('meta-data', $adapter->getSize('foo.md'));
+    }
+
+    /**
+     * @dataProvider qiniuProvider
+     */
+    public function testGetUploadToken($adapter, $managers)
+    {
+        $managers['authManager']->expects()->uploadToken('bucket', null, 3600, true)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken());
+
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 3600, true)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key'));
+
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, true)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200));
+
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, false)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200, false));
     }
 
     /**

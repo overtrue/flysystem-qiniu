@@ -16,17 +16,48 @@ use Qiniu\Auth;
 use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 
+/**
+ * Class QiniuAdapter
+ *
+ * @author overtrue <i@overtrue.me>
+ */
 class QiniuAdapter extends AbstractAdapter
 {
     use NotSupportingVisibilityTrait;
 
+    /**
+     * @var string
+     */
     protected $accessKey;
+
+    /**
+     * @var string
+     */
     protected $secretKey;
+
+    /**
+     * @var string
+     */
     protected $bucket;
+
+    /**
+     * @var string
+     */
     protected $domain;
 
+    /**
+     * @var \Qiniu\Auth
+     */
     protected $authManager;
+
+    /**
+     * @var \Qiniu\Storage\UploadManager
+     */
     protected $uploadManager;
+
+    /**
+     * @var \Qiniu\Storage\BucketManager
+     */
     protected $bucketManager;
 
     /**
@@ -57,10 +88,10 @@ class QiniuAdapter extends AbstractAdapter
     public function write($path, $contents, Config $config)
     {
         list($response, $error) = $this->getUploadManager()->put(
-                                                                $this->getAuthManager()->uploadToken($this->bucket),
-                                                                $path,
-                                                                $contents
-                                                            );
+            $this->getAuthManager()->uploadToken($this->bucket),
+            $path,
+            $contents
+        );
 
         if ($error) {
             return false;
@@ -131,13 +162,13 @@ class QiniuAdapter extends AbstractAdapter
      * Rename a file.
      *
      * @param string $path
-     * @param string $newpath
+     * @param string $newPath
      *
      * @return bool
      */
-    public function rename($path, $newpath)
+    public function rename($path, $newPath)
     {
-        $response = $this->getBucketManager()->rename($this->bucket, $path, $newpath);
+        $response = $this->getBucketManager()->rename($this->bucket, $path, $newPath);
 
         return is_null($response);
     }
@@ -146,13 +177,13 @@ class QiniuAdapter extends AbstractAdapter
      * Copy a file.
      *
      * @param string $path
-     * @param string $newpath
+     * @param string $newPath
      *
      * @return bool
      */
-    public function copy($path, $newpath)
+    public function copy($path, $newPath)
     {
-        $response = $this->getBucketManager()->copy($this->bucket, $path, $this->bucket, $newpath);
+        $response = $this->getBucketManager()->copy($this->bucket, $path, $this->bucket, $newPath);
 
         return is_null($response);
     }
@@ -174,11 +205,11 @@ class QiniuAdapter extends AbstractAdapter
     /**
      * Delete a directory.
      *
-     * @param string $dirname
+     * @param string $directory
      *
      * @return bool
      */
-    public function deleteDir($dirname)
+    public function deleteDir($directory)
     {
         return true;
     }
@@ -186,14 +217,14 @@ class QiniuAdapter extends AbstractAdapter
     /**
      * Create a directory.
      *
-     * @param string $dirname directory name
+     * @param string $directory directory name
      * @param Config $config
      *
      * @return array|false
      */
-    public function createDir($dirname, Config $config)
+    public function createDir($directory, Config $config)
     {
-        return ['path' => $dirname, 'type' => 'dir'];
+        return ['path' => $directory, 'type' => 'dir'];
     }
 
     /**
@@ -303,13 +334,13 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
-     * Get the mimetype of a file.
+     * Get the mime-type of a file.
      *
      * @param string $path
      *
      * @return array|false
      */
-    public function getMimetype($path)
+    public function getMimeType($path)
     {
         $response = $this->getBucketManager()->stat($this->bucket, $path);
 
@@ -395,13 +426,13 @@ class QiniuAdapter extends AbstractAdapter
     /**
      * Get the upload token.
      *
-     * @param null $key
+     * @param string|null $key
      * @param int  $expires
-     * @param null $policy
+     * @param bool $policy
      *
      * @return string
      */
-    public function getUploadToken($key = null, $expires = 3600, $policy = null)
+    public function getUploadToken($key = null, $expires = 3600, $policy = true)
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy);
     }
