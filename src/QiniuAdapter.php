@@ -396,9 +396,7 @@ class QiniuAdapter extends AbstractAdapter
      * Get the upload token.
      *
      * @param null $key
-     *
      * @param int  $expires
-     *
      * @param null $policy
      *
      * @return string
@@ -407,7 +405,7 @@ class QiniuAdapter extends AbstractAdapter
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy);
     }
-
+    
     /**
      * @param array $stats
      *
