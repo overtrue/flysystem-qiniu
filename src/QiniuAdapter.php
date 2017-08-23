@@ -87,10 +87,18 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function write($path, $contents, Config $config)
     {
+        $mime = 'application/octet-stream';
+
+        if ($config->has('mime')) {
+            $mime = $config->get('mime');
+        }
+
         list($response, $error) = $this->getUploadManager()->put(
             $this->getAuthManager()->uploadToken($this->bucket),
             $path,
-            $contents
+            $contents,
+            null,
+            $mime
         );
 
         if ($error) {
@@ -331,6 +339,25 @@ class QiniuAdapter extends AbstractAdapter
     public function getSize($path)
     {
         return $this->getMetadata($path);
+    }
+
+    /**
+     * Fetch url to bucket.
+     *
+     * @param string $path
+     * @param string $url
+     *
+     * @return array|false
+     */
+    public function fetch($path, $url)
+    {
+        list($response, $error) = $this->getBucketManager()->fetch($url, $this->bucket, $path);
+
+        if ($error) {
+            return false;
+        }
+
+        return $response;
     }
 
     /**

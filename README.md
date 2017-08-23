@@ -28,6 +28,7 @@ $ composer require "overtrue/flysystem-qiniu" -vvv
 ```php
 use League\Flysystem\Filesystem;
 use Overtrue\Flysystem\Qiniu\QiniuAdapter;
+use Overtrue\Flysystem\Qiniu\Plugins\FetchFile;
 
 $accessKey = 'xxxxxx';
 $secretKey = 'xxxxxx';
@@ -38,12 +39,17 @@ $adapter = new QiniuAdapter($accessKey, $secretKey, $bucket, $domain);
 
 $flysystem = new League\Flysystem\Filesystem($adapter);
 
+# if you want to use fetch method
+$flysystem->addPlugin(new FetchFile());
+
 ```
 
 ## API
 
 ```php
 bool $flysystem->write('file.md', 'contents');
+
+bool $flysystem->write('file.md', 'http://httpbin.org/robots.txt', ['mime' => 'application/redirect302']);
 
 bool $flysystem->writeStream('file.md', fopen('path/to/your/local/file.jpg', 'r'));
 
@@ -72,6 +78,8 @@ string $flysystem->getAdapter()->getUrl('file.md');
 string $flysystem->getMimetype('file.md');
 
 int $flysystem->getTimestamp('file.md');
+
+bool $flysystem->fetch('file.md', 'http://httpbin.org/robots.txt');
 
 ```
 
