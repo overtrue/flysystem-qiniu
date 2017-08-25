@@ -227,7 +227,7 @@ class QiniuAdapterTest extends TestCase
     public function testListContents($adapter, $managers)
     {
         $managers['bucketManager']->expects()->listFiles('bucket', 'path/to/list')
-            ->andReturns([[
+            ->andReturn([['items' => [
                 [
                     'key' => 'foo.md',
                     'putTime' => 123 * 10000000,
@@ -238,7 +238,7 @@ class QiniuAdapterTest extends TestCase
                     'putTime' => 124 * 10000000,
                     'fsize' => 124,
                 ],
-            ]])
+            ]]])
             ->twice();
 
         $this->assertSame([
@@ -294,17 +294,20 @@ class QiniuAdapterTest extends TestCase
      */
     public function testGetUploadToken($adapter, $managers)
     {
-        $managers['authManager']->expects()->uploadToken('bucket', null, 3600, true)->andReturn('token');
+        $managers['authManager']->expects()->uploadToken('bucket', null, 3600, null, null)->andReturn('token');
         $this->assertSame('token', $adapter->getUploadToken());
 
-        $managers['authManager']->expects()->uploadToken('bucket', 'key', 3600, true)->andReturn('token');
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 3600, null, null)->andReturn('token');
         $this->assertSame('token', $adapter->getUploadToken('key'));
 
-        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, true)->andReturn('token');
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, null, null)->andReturn('token');
         $this->assertSame('token', $adapter->getUploadToken('key', 7200));
 
-        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, false)->andReturn('token');
-        $this->assertSame('token', $adapter->getUploadToken('key', 7200, false));
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, 'foo', null)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200, 'foo'));
+
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, 'foo', 'bar')->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200, 'foo', 'bar'));
     }
 
     /**
