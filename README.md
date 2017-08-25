@@ -39,9 +39,6 @@ $adapter = new QiniuAdapter($accessKey, $secretKey, $bucket, $domain);
 
 $flysystem = new League\Flysystem\Filesystem($adapter);
 
-# if you want to use fetch method
-$flysystem->addPlugin(new FetchFile());
-
 ```
 
 ## API
@@ -79,8 +76,37 @@ string $flysystem->getMimetype('file.md');
 
 int $flysystem->getTimestamp('file.md');
 
-bool $flysystem->fetch('file.md', 'http://httpbin.org/robots.txt');
+```
 
+### Plugins
+
+File Url: 
+
+```php
+use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
+
+$flysystem->addPlugin(new FileUrl());
+
+string $flysystem->getUrl('file.md');
+```
+
+Fetch file:
+
+```php
+use Overtrue\Flysystem\Qiniu\Plugins\FetchFile;
+
+$flysystem->addPlugin(new FetchFile());
+
+bool $flysystem->fetch('file.md', 'http://httpbin.org/robots.txt');
+```
+
+Upload Token:
+
+```php
+use Overtrue\Flysystem\Qiniu\Plugins\UploadToken;
+$flysystem->addPlugin(new UploadToken());
+
+string $flysystem->getUploadToken('file.md', 3600);
 ```
 
 # Integration

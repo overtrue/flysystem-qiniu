@@ -307,7 +307,7 @@ class QiniuAdapter extends AbstractAdapter
 
         $result = $this->getBucketManager()->listFiles($this->bucket, $directory);
 
-        foreach ($result[0] as $files) {
+        foreach (isset($result[0]['items']) ? $result[0]['items'] : [] as $files) {
             $list[] = $this->normalizeFileInfo($files);
         }
 
@@ -455,13 +455,14 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string|null $key
      * @param int         $expires
-     * @param bool        $policy
+     * @param string|null $policy
+     * @param string|null $strictPolice
      *
      * @return string
      */
-    public function getUploadToken($key = null, $expires = 3600, $policy = true)
+    public function getUploadToken($key = null, $expires = 3600, $policy = null, $strictPolice = null)
     {
-        return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy);
+        return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy, $strictPolice);
     }
 
     /**
