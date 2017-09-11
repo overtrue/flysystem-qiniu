@@ -258,7 +258,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function getUrl($path)
     {
-        return $this->normalizeHost($this->domain).$path;
+        return $this->normalizeHost($this->domain).ltrim($path, '/');
     }
 
     /**
