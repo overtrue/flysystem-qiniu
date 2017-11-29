@@ -13,6 +13,7 @@ use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
 use Qiniu\Auth;
+use Qiniu\Cdn\CdnManager;
 use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 
@@ -59,6 +60,11 @@ class QiniuAdapter extends AbstractAdapter
      * @var \Qiniu\Storage\BucketManager
      */
     protected $bucketManager;
+
+    /**
+     * @var \Qiniu\Cdn\CdnManager
+     */
+    protected $cdnManager;
 
     /**
      * QiniuAdapter constructor.
@@ -127,7 +133,7 @@ class QiniuAdapter extends AbstractAdapter
 
         $response = $this->write($path, $contents, $config);
 
-        if ($response === false) {
+        if (false === $response) {
             return $response;
         }
 
@@ -361,6 +367,40 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
+     * Get private file download url.
+     *
+     * @param string $path
+     * @param int    $expires
+     *
+     * @return string
+     */
+    public function privateDownloadUrl($path, $expires = 3600)
+    {
+        $url = $this->getUrl($path);
+
+        return  $this->getAuthManager()->privateDownloadUrl($url, $expires);
+    }
+
+    /**
+     * Refresh file cache.
+     *
+     * @param string|array $path
+     *
+     * @return array
+     */
+    public function refresh($path)
+    {
+        if (is_string($path)) {
+            $path = [$path];
+        }
+
+        // 将 $path 变成完整的 url
+        $urls = array_map([$this, 'getUrl'], $path);
+
+        return $this->getCdnManager()->refreshUrls($urls);
+    }
+
+    /**
      * Get the mime-type of a file.
      *
      * @param string $path
@@ -427,6 +467,18 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
+     * @param CdnManager $manager
+     *
+     * @return $this
+     */
+    public function setCdnManager(CdnManager $manager)
+    {
+        $this->cdnManager = $manager;
+
+        return $this;
+    }
+
+    /**
      * @return \Qiniu\Storage\BucketManager
      */
     public function getBucketManager()
@@ -448,6 +500,14 @@ class QiniuAdapter extends AbstractAdapter
     public function getUploadManager()
     {
         return $this->uploadManager ?: $this->uploadManager = new UploadManager();
+    }
+
+    /**
+     * @return \Qiniu\Cdn\CdnManager
+     */
+    public function getCdnManager()
+    {
+        return $this->cdnManager ?: $this->cdnManager = new CdnManager($this->getAuthManager());
     }
 
     /**
