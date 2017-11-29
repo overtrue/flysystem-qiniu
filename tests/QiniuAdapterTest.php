@@ -35,6 +35,7 @@ class QiniuAdapterTest extends TestCase
         $authManager = \Mockery::mock('stdClass');
         $bucketManager = \Mockery::mock('stdClass');
         $uploadManager = \Mockery::mock('stdClass');
+        $cdnManager = \Mockery::mock('stdClass');
 
         $authManager->allows()->uploadToken('bucket')->andReturns('token');
 
@@ -42,10 +43,11 @@ class QiniuAdapterTest extends TestCase
             'getAuthManager' => $authManager,
             'getUploadManager' => $uploadManager,
             'getBucketManager' => $bucketManager,
+            'getCdnManager' => $cdnManager,
         ]);
 
         return [
-            [$adapter, compact('authManager', 'bucketManager', 'uploadManager')],
+            [$adapter, compact('authManager', 'bucketManager', 'uploadManager', 'cdnManager')],
         ];
     }
 
@@ -287,6 +289,29 @@ class QiniuAdapterTest extends TestCase
         $adapter->expects()->getMetadata('foo.md')->andReturns('meta-data')->once();
 
         $this->assertSame('meta-data', $adapter->getSize('foo.md'));
+    }
+
+    /**
+     * @dataProvider qiniuProvider
+     */
+    public function testPrivateDownloadUrl($adapter, $managers)
+    {
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/url', 3600)->andReturn('url');
+        $this->assertSame('url', $adapter->privateDownloadUrl('url'));
+
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/url', 7200)->andReturn('url');
+        $this->assertSame('url', $adapter->privateDownloadUrl('url', 7200));
+    }
+
+
+    /**
+     * @dataProvider qiniuProvider
+     */
+    public function testRefresh($adapter, $managers)
+    {
+        $managers['cdnManager']->expects()->refreshUrls(['http://domain.com/url'])->andReturn('url');
+        $this->assertSame('url', $adapter->refresh('url'));
+        $this->assertSame('url', $adapter->refresh(['url']));
     }
 
     /**
