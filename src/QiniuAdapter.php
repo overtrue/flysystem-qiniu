@@ -366,12 +366,11 @@ class QiniuAdapter extends AbstractAdapter
         return $response;
     }
 
-
     /**
      * Get private file download url.
      *
-     * @param $path
-     * @param int $expires
+     * @param string $path
+     * @param int    $expires
      *
      * @return string
      */
@@ -382,11 +381,10 @@ class QiniuAdapter extends AbstractAdapter
         return  $this->getAuthManager()->privateDownloadUrl($url, $expires);
     }
 
-
     /**
      * Refresh file cache.
      *
-     * @param $path
+     * @param string|array $path
      *
      * @return array
      */
