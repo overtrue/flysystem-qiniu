@@ -303,7 +303,6 @@ class QiniuAdapterTest extends TestCase
         $this->assertSame('url', $adapter->privateDownloadUrl('url', 7200));
     }
 
-
     /**
      * @dataProvider qiniuProvider
      */

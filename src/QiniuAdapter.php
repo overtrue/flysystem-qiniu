@@ -133,7 +133,7 @@ class QiniuAdapter extends AbstractAdapter
 
         $response = $this->write($path, $contents, $config);
 
-        if ($response === false) {
+        if (false === $response) {
             return $response;
         }
 
@@ -368,7 +368,7 @@ class QiniuAdapter extends AbstractAdapter
 
 
     /**
-     * Get private file download url
+     * Get private file download url.
      *
      * @param $path
      * @param int $expires
@@ -384,7 +384,7 @@ class QiniuAdapter extends AbstractAdapter
 
 
     /**
-     * Refresh file cache
+     * Refresh file cache.
      *
      * @param $path
      *

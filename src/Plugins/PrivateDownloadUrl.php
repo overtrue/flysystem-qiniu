@@ -4,11 +4,6 @@ namespace Overtrue\Flysystem\Qiniu\Plugins;
 
 use League\Flysystem\Plugin\AbstractPlugin;
 
-/**
- * Class PrivateDownloadUrl
- *
- * @package \Overtrue\Flysystem\Qiniu\Plugins
- */
 class PrivateDownloadUrl extends AbstractPlugin
 {
     public function getMethod()
