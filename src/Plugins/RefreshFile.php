@@ -13,7 +13,6 @@ class RefreshFile extends AbstractPlugin
 
     public function handle($path = [])
     {
-        $adapter = $this->filesystem->getAdapter();
-        return $adapter->refresh($path);
+        return $this->filesystem->getAdapter()->refresh($path);
     }
 }
