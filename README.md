@@ -88,8 +88,6 @@ use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
 $flysystem->addPlugin(new FileUrl());
 
 string $flysystem->getUrl('file.md');
-
-string $flysystem->privateDownloadUrl('file.md');
 ```
 
 Fetch file:
@@ -109,6 +107,18 @@ use Overtrue\Flysystem\Qiniu\Plugins\UploadToken;
 $flysystem->addPlugin(new UploadToken());
 
 string $flysystem->getUploadToken('file.md', 3600);
+```
+
+
+
+File private download Url: 
+
+```php
+use Overtrue\Flysystem\Qiniu\Plugins\PrivateDownloadUrl;
+
+$flysystem->addPlugin(new PrivateDownloadUrl());
+
+string $flysystem->privateDownloadUrl('file.md');
 ```
 
 # Integration
