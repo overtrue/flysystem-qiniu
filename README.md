@@ -76,6 +76,8 @@ string $flysystem->getMimetype('file.md');
 
 int $flysystem->getTimestamp('file.md');
 
+string $flysystem->privateDownloadUrl('file.md');
+
 ```
 
 ### Plugins
