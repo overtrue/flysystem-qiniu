@@ -88,6 +88,8 @@ use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
 $flysystem->addPlugin(new FileUrl());
 
 string $flysystem->getUrl('file.md');
+
+string $flysystem->privateDownloadUrl('file.md');
 ```
 
 Fetch file:
