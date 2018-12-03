@@ -104,7 +104,8 @@ class QiniuAdapter extends AbstractAdapter
             $path,
             $contents,
             null,
-            $mime
+            $mime,
+            $path
         );
 
         if ($error) {
