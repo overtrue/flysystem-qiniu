@@ -510,7 +510,15 @@ class QiniuAdapter extends AbstractAdapter
     {
         return $this->cdnManager ?: $this->cdnManager = new CdnManager($this->getAuthManager());
     }
-
+    
+    /**
+     * @return string
+     */
+    public function getBucket()
+    {
+        return $this->bucket;
+    }
+    
     /**
      * Get the upload token.
      *
