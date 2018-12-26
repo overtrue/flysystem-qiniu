@@ -436,7 +436,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @return $this
      */
-    public function setBucketManager(BucketManager $manager)
+    public function setBucketManager($manager)
     {
         $this->bucketManager = $manager;
 
