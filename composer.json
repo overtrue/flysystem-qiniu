@@ -9,7 +9,7 @@
     "require-dev": {
         "php": ">=5.6.0",
         "phpunit/phpunit": "~8.0",
-        "mockery/mockery": "1.0.x-dev"
+        "mockery/mockery": "1.2.2"
     },
     "autoload": {
         "psr-4": {
