@@ -22,7 +22,7 @@ use Qiniu\Storage\UploadManager;
  */
 class QiniuAdapterTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__.'/helpers.php';
     }
@@ -56,7 +56,7 @@ class QiniuAdapterTest extends TestCase
      */
     public function testWrite($adapter, $managers)
     {
-        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'content', null, 'application/octet-stream')
+        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'content', null, 'application/octet-stream', 'foo/bar.md')
             ->andReturns(['response', false], ['response', true])
             ->twice();
 
@@ -69,7 +69,7 @@ class QiniuAdapterTest extends TestCase
      */
     public function testWriteWithMime($adapter, $managers)
     {
-        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'http://httpbin/org', null, 'application/redirect302')
+        $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'http://httpbin/org', null, 'application/redirect302', 'foo/bar.md')
             ->andReturns(['response', false], ['response', true])
             ->twice();
 
@@ -205,6 +205,12 @@ class QiniuAdapterTest extends TestCase
             'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/file.md'),
             'path' => 'foo/file.md',
         ], $adapter->read('foo/file.md'));
+
+        // urlencode
+        $this->assertSame([
+            'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md'),
+            'path' => 'foo/文件名.md',
+        ], $adapter->read('foo/文件名.md'));
     }
 
     /**
@@ -218,6 +224,11 @@ class QiniuAdapterTest extends TestCase
             'stream' => \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/file.md', 'r'),
             'path' => 'foo/file.md',
         ], $adapter->readStream('foo/file.md'));
+
+        $this->assertSame([
+            'stream' => \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 'r'),
+            'path' => 'foo/文件名.md',
+        ], $adapter->readStream('foo/文件名.md'));
 
         $GLOBALS['result_of_ini_get'] = false;
         $this->assertFalse($adapter->readStream('foo/file.md'));

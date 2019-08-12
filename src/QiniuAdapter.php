@@ -265,7 +265,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function getUrl($path)
     {
-        return $this->normalizeHost($this->domain).ltrim($path, '/');
+        return $this->normalizeHost($this->domain).ltrim(implode('/', array_map('urlencode', explode('/', $path))), '/');
     }
 
     /**
@@ -292,7 +292,7 @@ class QiniuAdapter extends AbstractAdapter
     public function readStream($path)
     {
         if (ini_get('allow_url_fopen')) {
-            $stream = fopen($this->normalizeHost($this->domain).$path, 'r');
+            $stream = fopen($this->getUrl($path), 'r');
 
             return compact('stream', 'path');
         }
@@ -377,9 +377,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function privateDownloadUrl($path, $expires = 3600)
     {
-        $url = $this->getUrl($path);
-
-        return  $this->getAuthManager()->privateDownloadUrl($url, $expires);
+        return  $this->getAuthManager()->privateDownloadUrl($this->getUrl($path), $expires);
     }
 
     /**
