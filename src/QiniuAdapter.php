@@ -87,7 +87,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      * @param string $contents
-     * @param Config $config   Config object
+     * @param Config $config Config object
      *
      * @return array|false false on failure file meta data on success
      */
@@ -120,7 +120,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string   $path
      * @param resource $resource
-     * @param Config   $config   Config object
+     * @param Config   $config Config object
      *
      * @return array|false false on failure file meta data on success
      */
@@ -146,7 +146,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      * @param string $contents
-     * @param Config $config   Config object
+     * @param Config $config Config object
      *
      * @return array|false false on failure file meta data on success
      */
@@ -162,7 +162,7 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string   $path
      * @param resource $resource
-     * @param Config   $config   Config object
+     * @param Config   $config Config object
      *
      * @return array|false false on failure file meta data on success
      */
@@ -266,9 +266,9 @@ class QiniuAdapter extends AbstractAdapter
     public function getUrl($path)
     {
         $segments = $this->parse_url($path);
-        $query = empty($segments['query']) ? '' : '?'.$segments['query'];
+        $query = empty($segments['query']) ? '' : '?' . $segments['query'];
 
-        return $this->normalizeHost($this->domain).ltrim(implode('/', array_map('urlencode', explode('/', $segments['path']))), '/').$query;
+        return $this->normalizeHost($this->domain) . ltrim(implode('/', array_map('urlencode', explode('/', $segments['path']))), '/') . $query;
     }
 
     /**
@@ -380,7 +380,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function privateDownloadUrl($path, $expires = 3600)
     {
-        return  $this->getAuthManager()->privateDownloadUrl($this->getUrl($path), $expires);
+        return $this->getAuthManager()->privateDownloadUrl($this->getUrl($path), $expires);
     }
 
     /**
@@ -561,13 +561,13 @@ class QiniuAdapter extends AbstractAdapter
             $domain = "http://{$domain}";
         }
 
-        return rtrim($domain, '/').'/';
+        return rtrim($domain, '/') . '/';
     }
 
     /**
      * Does a UTF-8 safe version of PHP parse_url function
      *
-     * @param   string  $url  URL to parse
+     * @param string $url URL to parse
      *
      * @return  mixed  Associative array or false if badly formed URL.
      *
@@ -579,8 +579,8 @@ class QiniuAdapter extends AbstractAdapter
         $result = false;
 
         // Build arrays of values we need to decode before parsing
-        $entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%23', '%5B', '%5D');
-        $replacements = array('!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "$", ",", "/", "?", "#", "[", "]");
+        $entities = ['%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%23', '%5B', '%5D'];
+        $replacements = ['!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "$", ",", "/", "?", "#", "[", "]"];
 
         // Create encoded URL with special URL characters decoded so it can be parsed
         // All other characters will be encoded
@@ -590,13 +590,12 @@ class QiniuAdapter extends AbstractAdapter
         $encodedParts = parse_url($encodedURL);
 
         // Now, decode each value of the resulting array
-        if ($encodedParts)
-        {
-            foreach ($encodedParts as $key => $value)
-            {
+        if ($encodedParts) {
+            foreach ($encodedParts as $key => $value) {
                 $result[$key] = urldecode(str_replace($replacements, $entities, $value));
             }
         }
+
         return $result;
     }
 }
