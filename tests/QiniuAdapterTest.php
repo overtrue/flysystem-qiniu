@@ -211,6 +211,12 @@ class QiniuAdapterTest extends TestCase
             'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md'),
             'path' => 'foo/文件名.md',
         ], $adapter->read('foo/文件名.md'));
+
+        // urlencode with query
+        $this->assertSame([
+            'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx'),
+            'path' => 'foo/文件名.md?info=yes&type=xxx',
+        ], $adapter->read('foo/文件名.md?info=yes&type=xxx'));
     }
 
     /**

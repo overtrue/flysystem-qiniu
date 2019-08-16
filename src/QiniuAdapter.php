@@ -265,7 +265,10 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function getUrl($path)
     {
-        return $this->normalizeHost($this->domain).ltrim(implode('/', array_map('urlencode', explode('/', $path))), '/');
+        $segments = $this->parse_url($path);
+        $query = empty($segments['query']) ? '' : '?'.$segments['query'];
+
+        return $this->normalizeHost($this->domain).ltrim(implode('/', array_map('urlencode', explode('/', $segments['path']))), '/').$query;
     }
 
     /**
@@ -559,5 +562,41 @@ class QiniuAdapter extends AbstractAdapter
         }
 
         return rtrim($domain, '/').'/';
+    }
+
+    /**
+     * Does a UTF-8 safe version of PHP parse_url function
+     *
+     * @param   string  $url  URL to parse
+     *
+     * @return  mixed  Associative array or false if badly formed URL.
+     *
+     * @see     http://us3.php.net/manual/en/function.parse-url.php
+     * @since   11.1
+     */
+    protected static function parse_url($url)
+    {
+        $result = false;
+
+        // Build arrays of values we need to decode before parsing
+        $entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%23', '%5B', '%5D');
+        $replacements = array('!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "$", ",", "/", "?", "#", "[", "]");
+
+        // Create encoded URL with special URL characters decoded so it can be parsed
+        // All other characters will be encoded
+        $encodedURL = str_replace($entities, $replacements, urlencode($url));
+
+        // Parse the encoded URL
+        $encodedParts = parse_url($encodedURL);
+
+        // Now, decode each value of the resulting array
+        if ($encodedParts)
+        {
+            foreach ($encodedParts as $key => $value)
+            {
+                $result[$key] = urldecode(str_replace($replacements, $entities, $value));
+            }
+        }
+        return $result;
     }
 }
