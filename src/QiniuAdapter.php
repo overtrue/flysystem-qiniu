@@ -565,11 +565,11 @@ class QiniuAdapter extends AbstractAdapter
     }
 
     /**
-     * Does a UTF-8 safe version of PHP parse_url function
+     * Does a UTF-8 safe version of PHP parse_url function.
      *
      * @param string $url URL to parse
      *
-     * @return  mixed  Associative array or false if badly formed URL.
+     * @return mixed associative array or false if badly formed URL
      *
      * @see     http://us3.php.net/manual/en/function.parse-url.php
      * @since   11.1
