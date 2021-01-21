@@ -214,7 +214,7 @@ class QiniuAdapter extends AbstractAdapter
     {
         $response = $this->getBucketManager()->delete($this->bucket, $path);
 
-        return is_null($response);
+        return is_null($response[1]);
     }
 
     /**
