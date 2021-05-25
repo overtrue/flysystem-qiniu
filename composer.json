@@ -3,7 +3,7 @@
     "description": "Flysystem adapter for the Qiniu storage.",
     "require": {
         "php": ">=5.5.9",
-        "league/flysystem": "^1.0",
+        "league/flysystem": "^2.1",
         "qiniu/php-sdk": "^7.2"
     },
     "require-dev": {
