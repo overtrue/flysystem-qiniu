@@ -9,11 +9,24 @@
 
 namespace Overtrue\Flysystem\Qiniu;
 
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\InvalidVisibilityProvided;
+use League\Flysystem\StorageAttributes;
+use League\Flysystem\UnableToCopyFile;
+use League\Flysystem\UnableToCreateDirectory;
+use League\Flysystem\UnableToDeleteDirectory;
+use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToReadFile;
+use League\Flysystem\UnableToRetrieveMetadata;
+use League\Flysystem\UnableToSetVisibility;
+use League\Flysystem\UnableToWriteFile;
 use Qiniu\Auth;
 use Qiniu\Cdn\CdnManager;
+use Qiniu\Http\Error;
 use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 
@@ -22,10 +35,8 @@ use Qiniu\Storage\UploadManager;
  *
  * @author overtrue <i@overtrue.me>
  */
-class QiniuAdapter extends AbstractAdapter
+class QiniuAdapter implements FilesystemAdapter
 {
-    use NotSupportingVisibilityTrait;
-
     /**
      * @var string
      */
@@ -87,19 +98,16 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      * @param string $contents
-     * @param Config $config   Config object
-     *
-     * @return array|false false on failure file meta data on success
+     * @param Config $config Config object
      */
-    public function write($path, $contents, Config $config)
+    public function write(string $path, string $contents, Config $config): void
     {
-        $mime = 'application/octet-stream';
+        $mime = $config->get('mime', 'application/octet-stream');
 
-        if ($config->has('mime')) {
-            $mime = $config->get('mime');
-        }
-
-        list($response, $error) = $this->getUploadManager()->put(
+        /**
+         * @var Error|null $error
+         */
+        [, $error] = $this->getUploadManager()->put(
             $this->getAuthManager()->uploadToken($this->bucket),
             $path,
             $contents,
@@ -109,98 +117,48 @@ class QiniuAdapter extends AbstractAdapter
         );
 
         if ($error) {
-            return false;
+            throw UnableToWriteFile::atLocation($path, $error->message());
         }
-
-        return $response;
     }
 
     /**
      * Write a new file using a stream.
      *
-     * @param string   $path
-     * @param resource $resource
-     * @param Config   $config   Config object
-     *
-     * @return array|false false on failure file meta data on success
+     * @param string $path
+     * @param resource $contents
+     * @param Config $config Config object
      */
-    public function writeStream($path, $resource, Config $config)
+    public function writeStream(string $path, $contents, Config $config): void
     {
-        $contents = '';
+        $data = '';
 
-        while (!feof($resource)) {
-            $contents .= fread($resource, 1024);
+        while (!feof($contents)) {
+            $data .= fread($contents, 1024);
         }
 
-        $response = $this->write($path, $contents, $config);
+        $this->write($path, $data, $config);
+    }
 
-        if (false === $response) {
-            return $response;
+    public function move(string $source, string $destination, Config $config): void
+    {
+        $response = $this->getBucketManager()->rename($this->bucket, $source, $destination);
+        if (is_null($response)) {
+            throw UnableToMoveFile::fromLocationTo($source, $destination);
         }
-
-        return compact('path');
-    }
-
-    /**
-     * Update a file.
-     *
-     * @param string $path
-     * @param string $contents
-     * @param Config $config   Config object
-     *
-     * @return array|false false on failure file meta data on success
-     */
-    public function update($path, $contents, Config $config)
-    {
-        $this->delete($path);
-
-        return $this->write($path, $contents, $config);
-    }
-
-    /**
-     * Update a file using a stream.
-     *
-     * @param string   $path
-     * @param resource $resource
-     * @param Config   $config   Config object
-     *
-     * @return array|false false on failure file meta data on success
-     */
-    public function updateStream($path, $resource, Config $config)
-    {
-        $this->delete($path);
-
-        return $this->writeStream($path, $resource, $config);
-    }
-
-    /**
-     * Rename a file.
-     *
-     * @param string $path
-     * @param string $newPath
-     *
-     * @return bool
-     */
-    public function rename($path, $newPath)
-    {
-        $response = $this->getBucketManager()->rename($this->bucket, $path, $newPath);
-
-        return is_null($response);
     }
 
     /**
      * Copy a file.
      *
-     * @param string $path
-     * @param string $newPath
-     *
-     * @return bool
+     * @param string $source
+     * @param string $destination
      */
-    public function copy($path, $newPath)
+    public function copy(string $source, string $destination, Config $config): void
     {
-        $response = $this->getBucketManager()->copy($this->bucket, $path, $this->bucket, $newPath);
-
-        return is_null($response);
+        $response = $this->getBucketManager()->copy($this->bucket, $source, $this->bucket, $destination);
+        if (is_null($response)) {
+            throw UnableToCopyFile::fromLocationTo($source, $destination);
+        }
     }
 
     /**
@@ -210,36 +168,31 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @return bool
      */
-    public function delete($path)
+    public function delete(string $path): void
     {
         $response = $this->getBucketManager()->delete($this->bucket, $path);
-
-        return is_null($response);
+        if (is_null($response)) {
+            throw UnableToDeleteFile::atLocation($path);
+        }
     }
 
     /**
      * Delete a directory.
      *
-     * @param string $directory
-     *
-     * @return bool
+     * @param string $path
      */
-    public function deleteDir($directory)
+    public function deleteDirectory(string $path): void
     {
-        return true;
     }
 
     /**
      * Create a directory.
      *
-     * @param string $directory directory name
+     * @param string $path directory name
      * @param Config $config
-     *
-     * @return array|false
      */
-    public function createDir($directory, Config $config)
+    public function createDirectory(string $path, Config $config): void
     {
-        return ['path' => $directory, 'type' => 'dir'];
     }
 
     /**
@@ -247,13 +200,13 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      *
-     * @return array|bool|null
+     * @return bool
      */
-    public function has($path)
+    public function fileExists(string $path): bool
     {
-        list($response, $error) = $this->getBucketManager()->stat($this->bucket, $path);
+        [, $error] = $this->getBucketManager()->stat($this->bucket, $path);
 
-        return !$error || is_array($response);
+        return is_null($error);
     }
 
     /**
@@ -263,12 +216,12 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @return string
      */
-    public function getUrl($path)
+    public function getUrl(string $path): string
     {
         $segments = $this->parseUrl($path);
-        $query = empty($segments['query']) ? '' : '?'.$segments['query'];
+        $query = empty($segments['query']) ? '' : '?' . $segments['query'];
 
-        return $this->normalizeHost($this->domain).ltrim(implode('/', array_map('rawurlencode', explode('/', $segments['path']))), '/').$query;
+        return $this->normalizeHost($this->domain) . ltrim(implode('/', array_map('rawurlencode', explode('/', $segments['path']))), '/') . $query;
     }
 
     /**
@@ -276,13 +229,16 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      *
-     * @return array|false
+     * @return string
      */
-    public function read($path)
+    public function read(string $path): string
     {
-        $contents = file_get_contents($this->getUrl($path));
+        $result = file_get_contents($this->getUrl($path));
+        if ($result === false) {
+            throw UnableToReadFile::fromLocation($path);
+        }
 
-        return compact('contents', 'path');
+        return $result;
     }
 
     /**
@@ -290,38 +246,34 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      *
-     * @return array|false
+     * @return resource
      */
-    public function readStream($path)
+    public function readStream(string $path)
     {
         if (ini_get('allow_url_fopen')) {
-            $stream = fopen($this->getUrl($path), 'r');
-
-            return compact('stream', 'path');
+            if ($result = fopen($this->getUrl($path), 'r')) {
+                return $result;
+            }
         }
 
-        return false;
+        throw UnableToReadFile::fromLocation($path);
     }
 
     /**
      * List contents of a directory.
      *
-     * @param string $directory
-     * @param bool   $recursive
+     * @param string $path
+     * @param bool $deep
      *
      * @return array
      */
-    public function listContents($directory = '', $recursive = false)
+    public function listContents(string $path, bool $deep): iterable
     {
-        $list = [];
+        $result = $this->getBucketManager()->listFiles($this->bucket, $path);
 
-        $result = $this->getBucketManager()->listFiles($this->bucket, $directory);
-
-        foreach (isset($result[0]['items']) ? $result[0]['items'] : [] as $files) {
-            $list[] = $this->normalizeFileInfo($files);
+        foreach ($result[0]['items'] ?? [] as $files) {
+            yield $this->normalizeFileInfo($files);
         }
-
-        return $list;
     }
 
     /**
@@ -344,11 +296,15 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      *
-     * @return array|false
+     * @return FileAttributes
      */
-    public function getSize($path)
+    public function fileSize(string $path): FileAttributes
     {
-        return $this->getMetadata($path);
+        $meta = $this->getMetadata($path);
+        if ($meta->fileSize() === null) {
+            throw UnableToRetrieveMetadata::fileSize($path);
+        }
+        return $meta;
     }
 
     /**
@@ -374,7 +330,7 @@ class QiniuAdapter extends AbstractAdapter
      * Get private file download url.
      *
      * @param string $path
-     * @param int    $expires
+     * @param int $expires
      *
      * @return string
      */
@@ -407,17 +363,16 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @param string $path
      *
-     * @return array|false
+     * @return FileAttributes
      */
-    public function getMimeType($path)
+    public function mimeType(string $path): FileAttributes
     {
-        $response = $this->getBucketManager()->stat($this->bucket, $path);
-
-        if (empty($response[0]['mimeType'])) {
-            return false;
+        $meta = $this->getMetadata($path);
+        if ($meta->mimeType() === null) {
+            throw UnableToRetrieveMetadata::mimeType($path);
         }
 
-        return ['mimetype' => $response[0]['mimeType']];
+        return $meta;
     }
 
     /**
@@ -427,9 +382,23 @@ class QiniuAdapter extends AbstractAdapter
      *
      * @return array|false
      */
-    public function getTimestamp($path)
+    public function lastModified(string $path): FileAttributes
     {
-        return $this->getMetadata($path);
+        $meta = $this->getMetadata($path);
+        if ($meta->lastModified() === null) {
+            throw UnableToRetrieveMetadata::lastModified($path);
+        }
+        return $meta;
+    }
+
+    public function visibility(string $path): FileAttributes
+    {
+        throw UnableToRetrieveMetadata::visibility($path);
+    }
+
+    public function setVisibility(string $path, string $visibility): void
+    {
+        throw UnableToSetVisibility::atLocation($path);
     }
 
     /**
@@ -524,7 +493,7 @@ class QiniuAdapter extends AbstractAdapter
      * Get the upload token.
      *
      * @param string|null $key
-     * @param int         $expires
+     * @param int $expires
      * @param string|null $policy
      * @param string|null $strictPolice
      *
@@ -542,12 +511,13 @@ class QiniuAdapter extends AbstractAdapter
      */
     protected function normalizeFileInfo(array $stats)
     {
-        return [
-            'type' => 'file',
-            'path' => $stats['key'],
-            'timestamp' => floor($stats['putTime'] / 10000000),
-            'size' => $stats['fsize'],
-        ];
+        return new FileAttributes(
+            $stats['key'],
+            $stats['fsize'] ?? null,
+            null,
+            isset($stats['putTime']) ? floor($stats['putTime'] / 10000000) : null,
+            $stats['mimeType'] ?? null
+        );
     }
 
     /**
@@ -561,7 +531,7 @@ class QiniuAdapter extends AbstractAdapter
             $domain = "http://{$domain}";
         }
 
-        return rtrim($domain, '/').'/';
+        return rtrim($domain, '/') . '/';
     }
 
     /**
