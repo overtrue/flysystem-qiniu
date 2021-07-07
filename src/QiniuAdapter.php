@@ -141,8 +141,8 @@ class QiniuAdapter implements FilesystemAdapter
 
     public function move(string $source, string $destination, Config $config): void
     {
-        $response = $this->getBucketManager()->rename($this->bucket, $source, $destination);
-        if (is_null($response)) {
+        [, $error] = $this->getBucketManager()->rename($this->bucket, $source, $destination);
+        if (!is_null($error)) {
             throw UnableToMoveFile::fromLocationTo($source, $destination);
         }
     }
@@ -155,8 +155,8 @@ class QiniuAdapter implements FilesystemAdapter
      */
     public function copy(string $source, string $destination, Config $config): void
     {
-        $response = $this->getBucketManager()->copy($this->bucket, $source, $this->bucket, $destination);
-        if (is_null($response)) {
+        [, $error] = $this->getBucketManager()->copy($this->bucket, $source, $this->bucket, $destination);
+        if (!is_null($error)) {
             throw UnableToCopyFile::fromLocationTo($source, $destination);
         }
     }
@@ -170,8 +170,8 @@ class QiniuAdapter implements FilesystemAdapter
      */
     public function delete(string $path): void
     {
-        $response = $this->getBucketManager()->delete($this->bucket, $path);
-        if (is_null($response)) {
+        [, $error] = $this->getBucketManager()->delete($this->bucket, $path);
+        if (!is_null($error)) {
             throw UnableToDeleteFile::atLocation($path);
         }
     }

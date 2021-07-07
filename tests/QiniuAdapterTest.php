@@ -10,10 +10,18 @@
 namespace Overtrue\Flysystem\Qiniu\Tests;
 
 use League\Flysystem\Config;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\UnableToCopyFile;
+use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToReadFile;
+use League\Flysystem\UnableToRetrieveMetadata;
+use League\Flysystem\UnableToWriteFile;
 use Mockery;
 use Overtrue\Flysystem\Qiniu\QiniuAdapter;
 use PHPUnit\Framework\TestCase;
 use Qiniu\Auth;
+use Qiniu\Http\Error;
 use Qiniu\Storage\BucketManager;
 use Qiniu\Storage\UploadManager;
 
@@ -24,7 +32,7 @@ class QiniuAdapterTest extends TestCase
 {
     public function setUp(): void
     {
-        require_once __DIR__.'/helpers.php';
+        require_once __DIR__ . '/helpers.php';
     }
 
     public function qiniuProvider()
@@ -57,11 +65,12 @@ class QiniuAdapterTest extends TestCase
     public function testWrite($adapter, $managers)
     {
         $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'content', null, 'application/octet-stream', 'foo/bar.md')
-            ->andReturns(['response', false], ['response', true])
+            ->andReturns(['response', null], ['response', new Error('foo/bar.md', (object)['error' => 'Not Found.'])])
             ->twice();
 
-        $this->assertSame('response', $adapter->write('foo/bar.md', 'content', new Config()));
-        $this->assertFalse($adapter->write('foo/bar.md', 'content', new Config()));
+        $this->assertNull($adapter->write('foo/bar.md', 'content', new Config()));
+        $this->expectException(UnableToWriteFile::class);
+        $adapter->write('foo/bar.md', 'content', new Config());
     }
 
     /**
@@ -70,18 +79,18 @@ class QiniuAdapterTest extends TestCase
     public function testWriteWithMime($adapter, $managers)
     {
         $managers['uploadManager']->expects()->put('token', 'foo/bar.md', 'http://httpbin/org', null, 'application/redirect302', 'foo/bar.md')
-            ->andReturns(['response', false], ['response', true])
+            ->andReturns(['response', null], ['response', new Error('foo/bar.md', (object)['error' => 'Not Found.'])])
             ->twice();
 
-        $this->assertSame(
-            'response',
+        $this->assertNull(
             $adapter->write(
                 'foo/bar.md',
                 'http://httpbin/org',
                 new Config(['mime' => 'application/redirect302'])
             )
         );
-        $this->assertFalse($adapter->write('foo/bar.md', 'http://httpbin/org', new Config(['mime' => 'application/redirect302'])));
+        $this->expectException(UnableToWriteFile::class);
+        $adapter->write('foo/bar.md', 'http://httpbin/org', new Config(['mime' => 'application/redirect302']));
     }
 
     /**
@@ -90,50 +99,25 @@ class QiniuAdapterTest extends TestCase
     public function testWriteStream($adapter)
     {
         $adapter->expects()->write('foo.md', '', Mockery::type(Config::class))
-            ->andReturns(true, false)
-            ->twice();
+            ->once();
 
-        $result = $adapter->writeStream('foo.md', tmpfile(), new Config());
-        $this->assertSame('foo.md', $result['path']);
-
-        $this->assertFalse($adapter->writeStream('foo.md', tmpfile(), new Config()));
+        $this->assertNull($adapter->writeStream('foo.md', tmpfile(), new Config()));
     }
 
     /**
      * @dataProvider qiniuProvider
      */
-    public function testUpdate($adapter)
-    {
-        $adapter->expects()->delete('foo.md')->once();
-        $adapter->expects()->write('foo.md', 'content', Mockery::type(Config::class))->andReturns(true)->once();
-
-        $this->assertTrue($adapter->update('foo.md', 'content', new Config()));
-    }
-
-    /**
-     * @dataProvider qiniuProvider
-     */
-    public function testUpdateStream($adapter)
-    {
-        $resource = tmpfile();
-        $adapter->expects()->delete('foo.md')->once();
-        $adapter->expects()->writeStream('foo.md', $resource, Mockery::type(Config::class))->andReturns(true)->once();
-
-        $this->assertTrue($adapter->updateStream('foo.md', $resource, new Config()));
-    }
-
-    /**
-     * @dataProvider qiniuProvider
-     */
-    public function testRename($adapter, $managers)
+    public function testMove($adapter, $managers)
     {
         $managers['bucketManager']->expects()
             ->rename('bucket', 'old.md', 'new.md')
-            ->andReturn(false, null)
+            ->andReturn([true, null], [false, new Error('', '')])
             ->twice();
 
-        $this->assertFalse($adapter->rename('old.md', 'new.md'));
-        $this->assertTrue($adapter->rename('old.md', 'new.md'));
+        $this->assertNull($adapter->move('old.md', 'new.md', new Config()));
+
+        $this->expectException(UnableToMoveFile::class);
+        $adapter->move('old.md', 'new.md', new Config());
     }
 
     /**
@@ -143,11 +127,13 @@ class QiniuAdapterTest extends TestCase
     {
         $managers['bucketManager']->expects()
             ->copy('bucket', 'old.md', 'bucket', 'new.md')
-            ->andReturn(false, null)
+            ->andReturn([true, null], [false, new Error('', '')])
             ->twice();
 
-        $this->assertFalse($adapter->copy('old.md', 'new.md'));
-        $this->assertTrue($adapter->copy('old.md', 'new.md'));
+        $this->assertNull($adapter->copy('old.md', 'new.md', new Config()));
+
+        $this->expectException(UnableToCopyFile::class);
+        $adapter->copy('old.md', 'new.md', new Config());
     }
 
     /**
@@ -157,30 +143,12 @@ class QiniuAdapterTest extends TestCase
     {
         $managers['bucketManager']->expects()
             ->delete('bucket', 'file.md')
-            ->andReturn(false, null)
+            ->andReturn([true, null], [false, new Error('', '')])
             ->twice();
 
-        $this->assertFalse($adapter->delete('file.md'));
-        $this->assertTrue($adapter->delete('file.md'));
-    }
-
-    /**
-     * @dataProvider qiniuProvider
-     */
-    public function testDeleteDir($adapter)
-    {
-        $this->assertTrue($adapter->deleteDir('foo/bar'));
-    }
-
-    /**
-     * @dataProvider qiniuProvider
-     */
-    public function testCreateDir($adapter)
-    {
-        $this->assertSame([
-            'path' => 'foo/bar',
-            'type' => 'dir',
-        ], $adapter->createDir('foo/bar', new Config()));
+        $this->assertNull($adapter->delete('file.md'));
+        $this->expectException(UnableToDeleteFile::class);
+        $adapter->delete('file.md');
     }
 
     /**
@@ -189,11 +157,11 @@ class QiniuAdapterTest extends TestCase
     public function testHas($adapter, $managers)
     {
         $managers['bucketManager']->expects()->stat('bucket', 'file.md')
-            ->andReturns(['response', false], ['response', true])
+            ->andReturns(['response', null], ['response', true])
             ->twice();
 
-        $this->assertTrue($adapter->has('file.md'));
-        $this->assertFalse($adapter->has('file.md'));
+        $this->assertTrue($adapter->fileExists('file.md'));
+        $this->assertFalse($adapter->fileExists('file.md'));
     }
 
     /**
@@ -201,22 +169,22 @@ class QiniuAdapterTest extends TestCase
      */
     public function testRead($adapter)
     {
-        $this->assertSame([
-            'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/file.md'),
-            'path' => 'foo/file.md',
-        ], $adapter->read('foo/file.md'));
+        $this->assertSame(
+            \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/file.md'),
+            $adapter->read('foo/file.md')
+        );
 
         // urlencode
-        $this->assertSame([
-            'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md'),
-            'path' => 'foo/文件名.md',
-        ], $adapter->read('foo/文件名.md'));
+        $this->assertSame(
+            \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md'),
+            $adapter->read('foo/文件名.md')
+        );
 
         // urlencode with query
-        $this->assertSame([
-            'contents' => \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx'),
-            'path' => 'foo/文件名.md?info=yes&type=xxx',
-        ], $adapter->read('foo/文件名.md?info=yes&type=xxx'));
+        $this->assertSame(
+            \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx'),
+            $adapter->read('foo/文件名.md?info=yes&type=xxx')
+        );
     }
 
     /**
@@ -226,18 +194,19 @@ class QiniuAdapterTest extends TestCase
     {
         $GLOBALS['result_of_ini_get'] = true;
 
-        $this->assertSame([
-            'stream' => \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/file.md', 'r'),
-            'path' => 'foo/file.md',
-        ], $adapter->readStream('foo/file.md'));
+        $this->assertSame(
+            \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/file.md', 'r'),
+            $adapter->readStream('foo/file.md')
+        );
 
-        $this->assertSame([
-            'stream' => \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 'r'),
-            'path' => 'foo/文件名.md',
-        ], $adapter->readStream('foo/文件名.md'));
+        $this->assertSame(
+            \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 'r'),
+            $adapter->readStream('foo/文件名.md')
+        );
 
         $GLOBALS['result_of_ini_get'] = false;
-        $this->assertFalse($adapter->readStream('foo/file.md'));
+        $this->expectException(UnableToReadFile::class);
+        $adapter->readStream('foo/file.md');
     }
 
     /**
@@ -260,20 +229,14 @@ class QiniuAdapterTest extends TestCase
             ]]])
             ->twice();
 
-        $this->assertSame([
-            [
-                'type' => 'file',
-                'path' => 'foo.md',
-                'timestamp' => 123.0,
-                'size' => 123,
-            ],
-            [
-                'type' => 'file',
-                'path' => 'bar.md',
-                'timestamp' => 124.0,
-                'size' => 124,
-            ],
-        ], $adapter->listContents('path/to/list'));
+        $res = $adapter->listContents('path/to/list', true);
+        $asserts = [
+            new FileAttributes('foo.md', 123, null, 123.0),
+            new FileAttributes('bar.md', 124, null, 124.0),
+        ];
+        foreach ($res as $item) {
+            $this->assertEquals(array_shift($asserts), $item);
+        }
     }
 
     /**
@@ -290,12 +253,7 @@ class QiniuAdapterTest extends TestCase
             ])
             ->once();
 
-        $this->assertSame([
-            'type' => 'file',
-            'path' => 'file.md',
-            'timestamp' => 124.0,
-            'size' => 124,
-        ], $adapter->getMetadata('file.md'));
+        $this->assertEquals(new FileAttributes('file.md', 124, null, 124), $adapter->getMetadata('file.md'));
     }
 
     /**
@@ -303,9 +261,9 @@ class QiniuAdapterTest extends TestCase
      */
     public function testGetSize($adapter)
     {
-        $adapter->expects()->getMetadata('foo.md')->andReturns('meta-data')->once();
+        $adapter->expects()->getMetadata('foo.md')->andReturns(new FileAttributes('file.md', 123))->once();
 
-        $this->assertSame('meta-data', $adapter->getSize('foo.md'));
+        $this->assertSame(123, $adapter->fileSize('foo.md')->fileSize());
     }
 
     /**
@@ -361,11 +319,13 @@ class QiniuAdapterTest extends TestCase
                 [
                     'mimeType' => 'application/xml',
                 ],
-            ], false)
+            ], [])
             ->twice();
 
-        $this->assertSame(['mimetype' => 'application/xml'], $adapter->getMimetype('foo.md'));
-        $this->assertFalse($adapter->getMimetype('foo.md'));
+        $this->assertEquals(new FileAttributes('foo.md', null, null, null, 'application/xml'), $adapter->mimeType('foo.md'));
+
+        $this->expectException(UnableToRetrieveMetadata::class);
+        $adapter->mimeType('foo.md');
     }
 
     /**
@@ -373,9 +333,9 @@ class QiniuAdapterTest extends TestCase
      */
     public function testGetTimestamp($adapter)
     {
-        $adapter->expects()->getMetadata('foo.md')->andReturns('meta-data')->once();
+        $adapter->expects()->getMetadata('foo.md')->andReturns(new FileAttributes('foo.md', null, null, 123))->once();
 
-        $this->assertSame('meta-data', $adapter->getTimestamp('foo.md'));
+        $this->assertSame(123, $adapter->lastModified('foo.md')->lastModified());
     }
 
     public function testSettersGetters()
