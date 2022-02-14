@@ -328,16 +328,6 @@ class QiniuAdapterTest extends TestCase
         $adapter->mimeType('foo.md');
     }
 
-    /**
-     * @dataProvider qiniuProvider
-     */
-    public function testGetTimestamp($adapter)
-    {
-        $adapter->expects()->getMetadata('foo.md')->andReturns(new FileAttributes('foo.md', null, null, 123))->once();
-
-        $this->assertSame(123, $adapter->lastModified('foo.md')->lastModified());
-    }
-
     public function testSettersGetters()
     {
         $authManager = new Auth('ak', 'sk');

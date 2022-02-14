@@ -9,12 +9,12 @@
 
 namespace Overtrue\Flysystem\Qiniu;
 
-function file_get_contents($path)
+function file_get_contents($path): string
 {
     return "contents of {$path}";
 }
 
-function fopen($path, $mode)
+function fopen($path, $mode): string
 {
     return "resource of {$path} with mode {$mode}";
 }

@@ -1,26 +1,24 @@
-<h1 align="center">Flysystem Qiniu</h1>
+Flysystem Adapter for Qiniu Cloud Storage
+---
 
-<p align="center">:floppy_disk: Flysystem adapter for the Qiniu storage.</p>
+:floppy_disk: Flysystem adapter for the Qiniu cloud storage.
 
-<p align="center">
-<a href="https://travis-ci.org/overtrue/flysystem-qiniu"><img src="https://travis-ci.org/overtrue/flysystem-qiniu.svg?branch=master" alt="Build Status"></a>
-<a href="https://packagist.org/packages/overtrue/flysystem-qiniu"><img src="https://poser.pugx.org/overtrue/flysystem-qiniu/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/overtrue/flysystem-qiniu"><img src="https://poser.pugx.org/overtrue/flysystem-qiniu/v/unstable.svg" alt="Latest Unstable Version"></a>
-<a href="https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master"><img src="https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality"></a>
-<a href="https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master"><img src="https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/coverage.png?b=master" alt="Code Coverage"></a>
-<a href="https://packagist.org/packages/overtrue/flysystem-qiniu"><img src="https://poser.pugx.org/overtrue/flysystem-qiniu/downloads" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/overtrue/flysystem-qiniu"><img src="https://poser.pugx.org/overtrue/flysystem-qiniu/license" alt="License"></a>
-</p>
-
+[![Build Status](https://travis-ci.org/overtrue/flysystem-qiniu.svg?branch=master)](https://travis-ci.org/overtrue/flysystem-qiniu) 
+[![Latest Stable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/stable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
+[![Latest Unstable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/unstable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master) 
+[![Code Coverage](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master) 
+[![Total Downloads](https://poser.pugx.org/overtrue/flysystem-qiniu/downloads)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
+[![License](https://poser.pugx.org/overtrue/flysystem-qiniu/license)](https://packagist.org/packages/overtrue/flysystem-qiniu)
 
 # Requirement
 
-- PHP >= 5.5.9
+- PHP >= 8.0.2
 
 # Installation
 
 ```shell
-$ composer require "overtrue/flysystem-qiniu" -vvv
+$ composer require "overtrue/flysystem-qiniu"
 ```
 
 # Usage
@@ -38,87 +36,25 @@ $domain = 'xxxx.bkt.clouddn.com'; // or with protocol: https://xxxx.bkt.clouddn.
 $adapter = new QiniuAdapter($accessKey, $secretKey, $bucket, $domain);
 
 $flysystem = new League\Flysystem\Filesystem($adapter);
-
 ```
 
 ## API
 
 ```php
 bool $flysystem->write('file.md', 'contents');
-
 bool $flysystem->write('file.md', 'http://httpbin.org/robots.txt', ['mime' => 'application/redirect302']);
-
 bool $flysystem->writeStream('file.md', fopen('path/to/your/local/file.jpg', 'r'));
-
-bool $flysystem->update('file.md', 'new contents');
-
-bool $flysystem->updateStream('file.md', fopen('path/to/your/local/file.jpg', 'r'));
-
 bool $flysystem->rename('foo.md', 'bar.md');
-
 bool $flysystem->copy('foo.md', 'foo2.md');
-
 bool $flysystem->delete('file.md');
-
 bool $flysystem->has('file.md');
-
+bool $flysystem->fileExists('file.md');
+bool $flysystem->directoryExists('path/to/dir');
 string|false $flysystem->read('file.md');
-
 array $flysystem->listContents();
-
-array $flysystem->getMetadata('file.md');
-
-int $flysystem->getSize('file.md');
-
+int $flysystem->fileSize('file.md');
 string $flysystem->getAdapter()->getUrl('file.md'); 
-
-string $flysystem->getMimetype('file.md');
-
-int $flysystem->getTimestamp('file.md');
-
-```
-
-### Plugins
-
-File Url: 
-
-```php
-use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
-
-$flysystem->addPlugin(new FileUrl());
-
-string $flysystem->getUrl('file.md');
-```
-
-Fetch file:
-
-```php
-use Overtrue\Flysystem\Qiniu\Plugins\FetchFile;
-
-$flysystem->addPlugin(new FetchFile());
-
-bool $flysystem->fetch('file.md', 'http://httpbin.org/robots.txt');
-```
-
-Upload Token:
-
-```php
-use Overtrue\Flysystem\Qiniu\Plugins\UploadToken;
-$flysystem->addPlugin(new UploadToken());
-
-string $flysystem->getUploadToken('file.md', 3600);
-```
-
-
-
-File private download Url: 
-
-```php
-use Overtrue\Flysystem\Qiniu\Plugins\PrivateDownloadUrl;
-
-$flysystem->addPlugin(new PrivateDownloadUrl());
-
-string $flysystem->privateDownloadUrl('file.md');
+string $flysystem->mimeType('file.md');
 ```
 
 # Integration
