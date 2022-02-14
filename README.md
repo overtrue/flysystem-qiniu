@@ -11,6 +11,8 @@ Flysystem Adapter for Qiniu Cloud Storage
 [![Total Downloads](https://poser.pugx.org/overtrue/flysystem-qiniu/downloads)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
 [![License](https://poser.pugx.org/overtrue/flysystem-qiniu/license)](https://packagist.org/packages/overtrue/flysystem-qiniu)
 
+[![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me-button-s.svg?raw=true)](https://github.com/sponsors/overtrue)
+
 # Requirement
 
 - PHP >= 8.0.2
@@ -61,6 +63,19 @@ string $flysystem->mimeType('file.md');
 
 - Laravel 5: [overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
 - Yii2: [krissss/yii2-filesystem-qiniu](https://github.com/krissss/yii2-filesystem-qiniu)
+
+## :heart: Sponsor me 
+
+[![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me.svg?raw=true)](https://github.com/sponsors/overtrue)
+
+如果你喜欢我的项目并想支持它，[点击这里 :heart:](https://github.com/sponsors/overtrue)
+
+
+## Project supported by JetBrains
+
+Many thanks to Jetbrains for kindly providing a license for me to work on this and other open-source projects.
+
+[![](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=https://github.com/overtrue)
 
 ## PHP 扩展包开发
 
