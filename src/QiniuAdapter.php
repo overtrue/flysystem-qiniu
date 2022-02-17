@@ -182,6 +182,14 @@ class QiniuAdapter implements FilesystemAdapter
         }
     }
 
+    protected function getMetadata($path): FileAttributes|array
+    {
+        $result = $this->getBucketManager()->stat($this->bucket, $path);
+        $result[0]['key'] = $path;
+
+        return $this->normalizeFileInfo($result[0]);
+    }
+
     public function getUrl(string $path): string
     {
         $segments = $this->parseUrl($path);
@@ -190,13 +198,6 @@ class QiniuAdapter implements FilesystemAdapter
         return $this->normalizeHost($this->domain) . ltrim(implode('/', array_map('rawurlencode', explode('/', $segments['path']))), '/') . $query;
     }
 
-    protected function getMetadata($path): FileAttributes|array
-    {
-        $result = $this->getBucketManager()->stat($this->bucket, $path);
-        $result[0]['key'] = $path;
-
-        return $this->normalizeFileInfo($result[0]);
-    }
 
     public function fetch(string $path, string $url): bool|array
     {
@@ -209,12 +210,28 @@ class QiniuAdapter implements FilesystemAdapter
         return $response;
     }
 
+    /**
+     * For laravel FilesystemAdapter.
+     */
+    public function getTemporaryUrl($path, int|string|\DateTimeInterface $expiration): string
+    {
+        if ($expiration instanceof \DateTimeInterface) {
+            $expiration = $expiration->getTimestamp();
+        }
+
+        if (is_string($expiration)) {
+            $expiration = strtotime($expiration);
+        }
+
+        return $this->privateDownloadUrl($path, $expiration);
+    }
+
     public function privateDownloadUrl(string $path, int $expires = 3600): string
     {
         return $this->getAuthManager()->privateDownloadUrl($this->getUrl($path), $expires);
     }
 
-    public function refresh($path)
+    public function refresh(string $path)
     {
         if (is_string($path)) {
             $path = [$path];

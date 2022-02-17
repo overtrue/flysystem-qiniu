@@ -1,21 +1,20 @@
-Flysystem Adapter for Qiniu Cloud Storage
----
+## Flysystem Adapter for Qiniu Cloud Storage
 
 :floppy_disk: Flysystem adapter for the Qiniu cloud storage.
 
-[![Build Status](https://travis-ci.org/overtrue/flysystem-qiniu.svg?branch=master)](https://travis-ci.org/overtrue/flysystem-qiniu) 
-[![Latest Stable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/stable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
-[![Latest Unstable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/unstable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master) 
-[![Code Coverage](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master) 
-[![Total Downloads](https://poser.pugx.org/overtrue/flysystem-qiniu/downloads)](https://packagist.org/packages/overtrue/flysystem-qiniu) 
+[![Build Status](https://travis-ci.org/overtrue/flysystem-qiniu.svg?branch=master)](https://travis-ci.org/overtrue/flysystem-qiniu)
+[![Latest Stable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/stable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu)
+[![Latest Unstable Version](https://poser.pugx.org/overtrue/flysystem-qiniu/v/unstable.svg)](https://packagist.org/packages/overtrue/flysystem-qiniu)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/overtrue/flysystem-qiniu/?branch=master)
+[![Total Downloads](https://poser.pugx.org/overtrue/flysystem-qiniu/downloads)](https://packagist.org/packages/overtrue/flysystem-qiniu)
 [![License](https://poser.pugx.org/overtrue/flysystem-qiniu/license)](https://packagist.org/packages/overtrue/flysystem-qiniu)
 
 [![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me-button-s.svg?raw=true)](https://github.com/sponsors/overtrue)
 
 # Requirement
 
-- PHP >= 8.0.2
+-   PHP >= 8.0.2
 
 # Installation
 
@@ -55,21 +54,30 @@ bool $flysystem->directoryExists('path/to/dir');
 string|false $flysystem->read('file.md');
 array $flysystem->listContents();
 int $flysystem->fileSize('file.md');
-string $flysystem->getAdapter()->getUrl('file.md'); 
 string $flysystem->mimeType('file.md');
+```
+
+Adapter extended methods:
+
+```php
+string $adapter->getUrl('file.md');
+bool|array $adapter->fetch(string $path, string $url);
+array $adapter->refresh(string $path);
+string $adapter->getTemporaryUrl($path, int|string|\DateTimeInterface $expiration);
+string $adapter->privateDownloadUrl(string $path, int $expires = 3600);
+string $adapter->getUploadToken(string $key = null, int $expires = 3600, string $policy = null, string $strictPolice = null)
 ```
 
 # Integration
 
-- Laravel 5: [overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
-- Yii2: [krissss/yii2-filesystem-qiniu](https://github.com/krissss/yii2-filesystem-qiniu)
+-   Laravel: [overtrue/laravel-filesystem-qiniu](https://github.com/overtrue/laravel-filesystem-qiniu)
+-   Yii2: [krissss/yii2-filesystem-qiniu](https://github.com/krissss/yii2-filesystem-qiniu)
 
-## :heart: Sponsor me 
+## :heart: Sponsor me
 
 [![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me.svg?raw=true)](https://github.com/sponsors/overtrue)
 
 如果你喜欢我的项目并想支持它，[点击这里 :heart:](https://github.com/sponsors/overtrue)
-
 
 ## Project supported by JetBrains
 
