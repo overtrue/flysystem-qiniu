@@ -80,18 +80,18 @@ class QiniuAdapter implements FilesystemAdapter
 
     public function read(string $path): string
     {
-        $result = file_get_contents($this->getUrl($path));
-        if ($result === false) {
+        $result = file_get_contents($this->privateDownloadUrl($path));
+        if (false === $result) {
             throw UnableToReadFile::fromLocation($path);
         }
 
         return $result;
     }
 
-    public function readStream(string $path)
+    public function readStream(string $path): string
     {
-        if (ini_get('allow_url_fopen')) {
-            if ($result = fopen($this->getUrl($path), 'r')) {
+        if (ini_get('allow_url_open')) {
+            if ($result = fopen($this->privateDownloadUrl($path), 'r')) {
                 return $result;
             }
         }
@@ -231,14 +231,10 @@ class QiniuAdapter implements FilesystemAdapter
         return $this->getAuthManager()->privateDownloadUrl($this->getUrl($path), $expires);
     }
 
-    public function refresh(string $path)
+    public function refresh(string|array $path): array
     {
-        if (is_string($path)) {
-            $path = [$path];
-        }
-
         // 将 $path 变成完整的 url
-        $urls = array_map([$this, 'getUrl'], $path);
+        $urls = array_map([$this, 'getUrl'], (array) $path);
 
         return $this->getCdnManager()->refreshUrls($urls);
     }

@@ -167,20 +167,23 @@ class QiniuAdapterTest extends TestCase
     /**
      * @dataProvider qiniuProvider
      */
-    public function testRead($adapter)
+    public function testRead($adapter, $managers)
     {
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/foo/file.md', 3600)->andReturn('http://domain.com/foo/file.md');
         $this->assertSame(
             \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/file.md'),
             $adapter->read('foo/file.md')
         );
 
         // urlencode
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 3600)->andReturn('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md');
         $this->assertSame(
             \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md'),
             $adapter->read('foo/文件名.md')
         );
 
         // urlencode with query
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx', 3600)->andReturn('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx');
         $this->assertSame(
             \Overtrue\Flysystem\Qiniu\file_get_contents('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md?info=yes&type=xxx'),
             $adapter->read('foo/文件名.md?info=yes&type=xxx')
@@ -190,15 +193,18 @@ class QiniuAdapterTest extends TestCase
     /**
      * @dataProvider qiniuProvider
      */
-    public function testReadStream($adapter)
+    public function testReadStream($adapter, $managers)
     {
         $GLOBALS['result_of_ini_get'] = true;
+
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/foo/file.md', 3600)->andReturn('http://domain.com/foo/file.md');
 
         $this->assertSame(
             \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/file.md', 'r'),
             $adapter->readStream('foo/file.md')
         );
 
+        $managers['authManager']->expects()->privateDownloadUrl('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 3600)->andReturn('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md');
         $this->assertSame(
             \Overtrue\Flysystem\Qiniu\fopen('http://domain.com/foo/%E6%96%87%E4%BB%B6%E5%90%8D.md', 'r'),
             $adapter->readStream('foo/文件名.md')
@@ -283,9 +289,9 @@ class QiniuAdapterTest extends TestCase
      */
     public function testRefresh($adapter, $managers)
     {
-        $managers['cdnManager']->expects()->refreshUrls(['http://domain.com/url'])->andReturn('url');
-        $this->assertSame('url', $adapter->refresh('url'));
-        $this->assertSame('url', $adapter->refresh(['url']));
+        $managers['cdnManager']->expects()->refreshUrls(['http://domain.com/url'])->andReturn(['url']);
+        $this->assertSame(['url'], $adapter->refresh('url'));
+        $this->assertSame(['url'], $adapter->refresh(['url']));
     }
 
     /**
