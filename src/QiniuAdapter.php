@@ -280,7 +280,7 @@ class QiniuAdapter extends AbstractAdapter
      */
     public function read($path)
     {
-        $contents = file_get_contents($this->getUrl($path));
+        $contents = file_get_contents($this->privateDownloadUrl($path));
 
         return compact('contents', 'path');
     }
@@ -295,7 +295,7 @@ class QiniuAdapter extends AbstractAdapter
     public function readStream($path)
     {
         if (ini_get('allow_url_fopen')) {
-            $stream = fopen($this->getUrl($path), 'r');
+            $stream = fopen($this->privateDownloadUrl($path), 'r');
 
             return compact('stream', 'path');
         }
