@@ -296,6 +296,11 @@ class QiniuAdapter implements FilesystemAdapter
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy, $strictPolice);
     }
+    
+    public function verifyCallback(string $contentType = null, string $originAuthorization = null, string $url = null, string $body = null)
+    {
+        return $this->getAuthManager()->verifyCallback($contentType, $originAuthorization, $url, $body);
+    }
 
     #[Pure]
     protected function normalizeFileInfo(array $stats): FileAttributes
