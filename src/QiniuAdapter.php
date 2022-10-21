@@ -292,7 +292,7 @@ class QiniuAdapter implements FilesystemAdapter
         return $this->bucket;
     }
 
-    public function getUploadToken(string $key = null, int $expires = 3600, string $policy = null, string $strictPolice = null): string
+    public function getUploadToken(string $key = null, int $expires = 3600, array $policy = null, string $strictPolice = null): string
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy, $strictPolice);
     }
