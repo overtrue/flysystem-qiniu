@@ -90,7 +90,7 @@ class QiniuAdapter implements FilesystemAdapter
 
     public function readStream(string $path): string
     {
-        if (ini_get('allow_url_open')) {
+        if (ini_get('allow_url_fopen')) {
             if ($result = fopen($this->privateDownloadUrl($path), 'r')) {
                 return $result;
             }
