@@ -308,11 +308,11 @@ class QiniuAdapterTest extends TestCase
         $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, null, null)->andReturn('token');
         $this->assertSame('token', $adapter->getUploadToken('key', 7200));
 
-        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, 'foo', null)->andReturn('token');
-        $this->assertSame('token', $adapter->getUploadToken('key', 7200, 'foo'));
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, ['foo'], null)->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200, ['foo']));
 
-        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, 'foo', 'bar')->andReturn('token');
-        $this->assertSame('token', $adapter->getUploadToken('key', 7200, 'foo', 'bar'));
+        $managers['authManager']->expects()->uploadToken('bucket', 'key', 7200, ['foo'], 'bar')->andReturn('token');
+        $this->assertSame('token', $adapter->getUploadToken('key', 7200, ['foo'], 'bar'));
     }
 
     /**
