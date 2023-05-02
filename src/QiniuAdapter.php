@@ -88,7 +88,7 @@ class QiniuAdapter implements FilesystemAdapter
         return $result;
     }
 
-    public function readStream(string $path): string
+    public function readStream(string $path)
     {
         if (ini_get('allow_url_fopen')) {
             if ($result = fopen($this->privateDownloadUrl($path), 'r')) {
@@ -296,7 +296,7 @@ class QiniuAdapter implements FilesystemAdapter
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy, $strictPolice);
     }
-    
+
     public function verifyCallback(string $contentType = null, string $originAuthorization = null, string $url = null, string $body = null)
     {
         return $this->getAuthManager()->verifyCallback($contentType, $originAuthorization, $url, $body);
