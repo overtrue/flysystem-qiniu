@@ -80,7 +80,12 @@ class QiniuAdapter implements FilesystemAdapter
 
     public function read(string $path): string
     {
-        $result = file_get_contents($this->privateDownloadUrl($path));
+        try {
+            $result = file_get_contents($this->privateDownloadUrl($path));
+        } catch (\Exception $th) {
+            throw UnableToReadFile::fromLocation($path);
+        }
+
         if (false === $result) {
             throw UnableToReadFile::fromLocation($path);
         }
