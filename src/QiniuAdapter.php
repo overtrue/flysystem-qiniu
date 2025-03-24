@@ -297,12 +297,12 @@ class QiniuAdapter implements FilesystemAdapter
         return $this->bucket;
     }
 
-    public function getUploadToken(string $key = null, int $expires = 3600, array $policy = null, string $strictPolice = null): string
+    public function getUploadToken(?string $key = null, int $expires = 3600, ?array $policy = null, ?string $strictPolice = null): string
     {
         return $this->getAuthManager()->uploadToken($this->bucket, $key, $expires, $policy, $strictPolice);
     }
 
-    public function verifyCallback(string $contentType = null, string $originAuthorization = null, string $url = null, string $body = null)
+    public function verifyCallback(?string $contentType = null, ?string $originAuthorization = null, ?string $url = null, ?string $body = null)
     {
         return $this->getAuthManager()->verifyCallback($contentType, $originAuthorization, $url, $body);
     }
