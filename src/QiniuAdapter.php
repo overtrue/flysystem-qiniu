@@ -220,15 +220,21 @@ class QiniuAdapter implements FilesystemAdapter
      */
     public function getTemporaryUrl($path, int|string|\DateTimeInterface $expiration): string
     {
+        $now = time();
+
         if ($expiration instanceof \DateTimeInterface) {
-            $expiration = $expiration->getTimestamp();
+            $expires = $expiration->getTimestamp() - $now;
+        } elseif (is_string($expiration)) {
+            $expires = strtotime($expiration) - $now;
+        } else {
+            $expires = ($expiration > $now) ? ($expiration - $now) : $expiration;
         }
 
-        if (is_string($expiration)) {
-            $expiration = strtotime($expiration);
+        if ($expires <= 0) {
+            $expires = 3600;
         }
 
-        return $this->privateDownloadUrl($path, $expiration);
+        return $this->privateDownloadUrl($path, $expires);
     }
 
     public function privateDownloadUrl(string $path, int $expires = 3600): string
