@@ -54,7 +54,7 @@ class QiniuAdapter implements FilesystemAdapter
          * @var Error|null $error
          */
         [, $error] = $this->getUploadManager()->put(
-            $this->getAuthManager()->uploadToken($this->bucket),
+            $this->getUploadToken(),
             $path,
             $contents,
             null,
